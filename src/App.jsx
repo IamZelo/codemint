@@ -219,6 +219,86 @@ const TrendChart = ({ transactions }) => {
     );
 };
 
+const ForeScoreView = ({ transactions, goal }) => {
+    const foreScore = useMemo(() => {
+        const { income, expenses } = transactions.reduce((acc, tx) => {
+            if (!tx.date) return acc;
+            const txDate = new Date(tx.date);
+            const today = new Date();
+            if (txDate.getMonth() === today.getMonth() && txDate.getFullYear() === today.getFullYear()) {
+                if (tx.type === 'income') acc.income += tx.amount;
+                else if (tx.type === 'expense') acc.expenses += tx.amount;
+            }
+            return acc;
+        }, { income: 0, expenses: 0 });
+
+        let score = 0;
+
+        if (income > 0) {
+            const savingsRatio = (income - expenses) / income;
+            score += Math.max(0, savingsRatio) * 50;
+        }
+
+        if (goal && goal.amount > 0) {
+            const balance = income - expenses;
+            const goalProgress = Math.max(0, balance) / goal.amount;
+            score += Math.min(1, goalProgress) * 30;
+        } else {
+            score += 10;
+        }
+
+        const monthlyTransactions = transactions.filter(tx => {
+            if (!tx.date) return false;
+            const txDate = new Date(tx.date);
+            const today = new Date();
+            return txDate.getMonth() === today.getMonth() && txDate.getFullYear() === today.getFullYear();
+        }).length;
+        score += Math.min(20, monthlyTransactions);
+
+        return Math.round(Math.max(0, Math.min(100, score)));
+    }, [transactions, goal]);
+
+    const worldImages = [
+        "src\\assets\\world_0.png", // Score 0-20 (Desert)
+        'src\\assets\\world_1.png', // Score 21-40 (Sparse Desert)
+        'src\\assets\\world_2.png', // Score 41-60 (Sparse Forest)
+        'src\\assets\\world_3.png', // Score 61-80 (Medium Forest)
+        'src\\assets\\world_4.png'  // Score 81-100 (Dense Forest)
+    ];
+
+    const worldImage = useMemo(() => {
+        if (foreScore <= 20) return worldImages[0];
+        if (foreScore <= 40) return worldImages[1];
+        if (foreScore <= 60) return worldImages[2];
+        if (foreScore <= 80) return worldImages[3];
+        return worldImages[4];
+    }, [foreScore]);
+
+    return (
+        <div className="bg-gray-800/50 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-gray-700/50 mb-8">
+            <h2 className="text-3xl pl-8 font-semibold mt-2 mb-2">Your Monthly ForeScore™</h2>
+            <div className="flex items-center pl-16 justify-center space-x-22 mb-4">
+                <div className='flex space-x-8'>
+
+                    <div className="text-5xl font-bold" style={{ color: `hsl(${foreScore}, 80%, 60%)` }}>{foreScore}</div>
+                    <div>
+                        <p className="text-gray-300">A real-time score of your financial health this month.</p>
+                        <p className="text-sm text-gray-400">Based on savings, goal progress, and activity.</p>
+                    </div>
+                </div>
+                <div className="w-2/5 mx-auto aspect-square flex justify-center items-center overflow-hidden rounded-lg ">
+                    <img
+                        src={worldImage}
+                        alt={`ForeScore World - Score ${foreScore}`}
+                        className="object-cover animate-fade-in w-full h-auto"
+                        onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/400x400/111827/9ca3af?text=Score:+${foreScore}`; }}
+                    />
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const DashboardView = ({ user, transactions, goal, onShowToast, onAwardAchievement }) => {
 
     const [fileToAnalyze, setFileToAnalyze] = useState({ type: null, data: null });
@@ -415,6 +495,9 @@ const DashboardView = ({ user, transactions, goal, onShowToast, onAwardAchieveme
                 <h1 className="text-4xl md:text-5xl font-bold">Welcome, {user.displayName.split(' ')[0]}!</h1>
                 <p className="text-gray-400 mt-2">Here's your financial overview for the month.</p>
             </header>
+
+            <ForeScoreView transactions={transactions} goal={goal} />
+
             <main className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-1 space-y-8">
                     <div className="bg-gray-800/50 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-gray-700/50">
@@ -620,7 +703,7 @@ const SpendingHeatmap = ({ transactions }) => {
             .forEach(t => {
                 const day = new Date(t.date).getDate();
                 const dayData = dataMap.get(day) || { income: 0, expense: 0 };
-                if(t.type === 'income'){
+                if (t.type === 'income') {
                     dayData.income += t.amount;
                 } else {
                     dayData.expense += t.amount;
@@ -631,10 +714,10 @@ const SpendingHeatmap = ({ transactions }) => {
 
         return { year, month, dailyData: dataMap, maxAmount: max };
     }, [transactions, date]);
-    
+
     const getSpendingColor = (income, expense, max) => {
         if (income === 0 && expense === 0) return 'bg-gray-700/50 hover:bg-gray-600/50';
-       
+
         if (income > expense) {
             const percentage = income / max;
             if (percentage > 0.75) return 'bg-emerald-700 hover:bg-emerald-600';
@@ -658,11 +741,11 @@ const SpendingHeatmap = ({ transactions }) => {
     for (let day = 1; day <= daysInMonth; day++) {
         const data = dailyData.get(day) || { income: 0, expense: 0 };
         const colorClass = getSpendingColor(data.income, data.expense, maxAmount);
-        
+
         calendarDays.push(
             <div key={day} className="relative group flex items-center justify-center">
                 <div className={`aspect-square w-full rounded-md flex items-center justify-center text-xs text-gray-300 transition-colors ${colorClass}`}>
-                  {day}
+                    {day}
                 </div>
                 <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-max px-2 py-1 bg-gray-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
                     <p className="text-emerald-400">In: ₹{data.income.toFixed(2)}</p>
@@ -708,7 +791,7 @@ const SpendingHeatmap = ({ transactions }) => {
 
 
 const ProfileView = ({ user, userProfile, onSetDailyGoal, onShowToast, transactions }) => {
-    
+
     const handleGoalSubmit = (e) => {
         e.preventDefault();
         const goalAmount = parseFloat(e.target.elements.dailyGoal.value);
@@ -719,19 +802,19 @@ const ProfileView = ({ user, userProfile, onSetDailyGoal, onShowToast, transacti
         onSetDailyGoal(goalAmount);
     };
 
-    return(
+    return (
         <div className="container mx-auto p-4 md:p-8">
             <header className="text-center mb-10 mt-8">
-                <img src={user.photoURL} className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-emerald-400" alt="User Profile"/>
+                <img src={user.photoURL} className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-emerald-400" alt="User Profile" />
                 <h1 className="text-4xl md:text-5xl font-bold">{user.displayName}</h1>
                 <p className="text-gray-400 mt-2">{user.email}</p>
             </header>
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 max-w-7xl mx-auto">
                 <div className="lg:col-span-2 flex flex-col space-y-8">
                     <div className="bg-gray-800/50 p-6 rounded-2xl shadow-lg border border-gray-700/50">
                         <h2 className="text-2xl font-semibold mb-2 text-center">Your Progress</h2>
-                         <div className="text-center mb-6">
+                        <div className="text-center mb-6">
                             <span className="text-6xl font-bold text-amber-400">{userProfile?.streakCount || 0}</span>
                             <span className="text-4xl ml-2">🔥</span>
                             <p className="text-gray-400">Day Streak</p>
@@ -739,7 +822,7 @@ const ProfileView = ({ user, userProfile, onSetDailyGoal, onShowToast, transacti
                         <form onSubmit={handleGoalSubmit}>
                             <label htmlFor="dailyGoal" className="block text-sm font-medium text-gray-300 mb-2">Set Your Daily Spending Goal</label>
                             <div className="flex items-center space-x-2">
-                                 <input
+                                <input
                                     type="number"
                                     name="dailyGoal"
                                     id="dailyGoal"
@@ -749,14 +832,14 @@ const ProfileView = ({ user, userProfile, onSetDailyGoal, onShowToast, transacti
                                     min="1"
                                     step="any"
                                     required
-                                 />
-                                 <button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-lg transition transform hover:-translate-y-0.5">
+                                />
+                                <button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-lg transition transform hover:-translate-y-0.5">
                                     Set
-                                 </button>
+                                </button>
                             </div>
                         </form>
                     </div>
-                     <SpendingHeatmap transactions={transactions} />
+                    <SpendingHeatmap transactions={transactions} />
                 </div>
                 <div className="lg:col-span-3">
                     <div className="bg-gray-800/50 p-6 rounded-2xl shadow-lg border border-gray-700/50 h-full">
@@ -832,7 +915,7 @@ const AppNavbar = ({ user, onSignOut, currentView, setCurrentView, onSignIn }) =
                                 <button onClick={onSignOut} className="hidden sm:block bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition transform hover:-translate-y-0.5">Logout</button>
                             </>
                         ) : (
-                             <button id="google-signin-btn" onClick={onSignIn} className="transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl">
+                            <button id="google-signin-btn" onClick={onSignIn} className="transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl">
                                 <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 48 48">
                                     <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
                                     <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path>
@@ -842,7 +925,7 @@ const AppNavbar = ({ user, onSignOut, currentView, setCurrentView, onSignIn }) =
                                 <span>Sign in</span>
                             </button>
                         )}
-                         {/* Hamburger Button */}
+                        {/* Hamburger Button */}
                         <div className="md:hidden">
                             <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-300 hover:text-white focus:outline-none z-50 relative">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -862,17 +945,17 @@ const AppNavbar = ({ user, onSignOut, currentView, setCurrentView, onSignIn }) =
             <div className={`fixed inset-0 z-40 bg-gray-900 bg-opacity-95 backdrop-blur-sm transition-opacity duration-300 ease-in-out md:hidden ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                 <div className="flex flex-col items-center justify-center h-full space-y-8">
                     {user ? (
-                         <>
+                        <>
                             <button onClick={() => handleLinkClick('dashboard')} className={`text-2xl font-semibold transition-colors ${currentView === 'dashboard' ? 'text-blue-400' : 'text-gray-300 hover:text-blue-400'}`}>Dashboard</button>
                             <button onClick={() => handleLinkClick('leaderboard')} className={`text-2xl font-semibold transition-colors ${currentView === 'leaderboard' ? 'text-blue-400' : 'text-gray-300 hover:text-blue-400'}`}>Leaderboard</button>
                             <button onClick={() => handleLinkClick('profile')} className={`text-2xl font-semibold transition-colors ${currentView === 'profile' ? 'text-blue-400' : 'text-gray-300 hover:text-blue-400'}`}>Profile</button>
                             <button onClick={onSignOut} className="absolute bottom-16 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-md text-base font-medium transition transform hover:-translate-y-0.5">Logout</button>
-                         </>
+                        </>
                     ) : (
                         <>
-                             <button onClick={() => handleLinkClick('home')} className={`text-2xl font-semibold transition-colors ${currentView === 'home' ? 'text-blue-400' : 'text-gray-300 hover:text-blue-400'}`}>Home</button>
-                             <button onClick={() => handleLinkClick('features')} className={`text-2xl font-semibold transition-colors ${currentView === 'features' ? 'text-blue-400' : 'text-gray-300 hover:text-blue-400'}`}>Features</button>
-                             <button onClick={() => handleLinkClick('about')} className={`text-2xl font-semibold transition-colors ${currentView === 'about' ? 'text-blue-400' : 'text-gray-300 hover:text-blue-400'}`}>About</button>
+                            <button onClick={() => handleLinkClick('home')} className={`text-2xl font-semibold transition-colors ${currentView === 'home' ? 'text-blue-400' : 'text-gray-300 hover:text-blue-400'}`}>Home</button>
+                            <button onClick={() => handleLinkClick('features')} className={`text-2xl font-semibold transition-colors ${currentView === 'features' ? 'text-blue-400' : 'text-gray-300 hover:text-blue-400'}`}>Features</button>
+                            <button onClick={() => handleLinkClick('about')} className={`text-2xl font-semibold transition-colors ${currentView === 'about' ? 'text-blue-400' : 'text-gray-300 hover:text-blue-400'}`}>About</button>
                         </>
                     )}
                 </div>
@@ -944,17 +1027,24 @@ export default function App() {
             showToast("Failed to update daily goal.");
         }
     }, [user]);
-    
+
     const checkStreak = useCallback(async () => {
         if (!user || !userProfile || !transactions.length > 0) return;
 
         const today = new Date();
-        today.setHours(0, 0, 0, 0); 
-        
-        const lastCheck = userProfile.lastStreakCheck ? new Date(userProfile.lastStreakCheck) : null;
+        today.setHours(0, 0, 0, 0);
 
-        if (lastCheck && lastCheck.getTime() === today.getTime()) {
-            return; // Already checked today
+        // const lastCheck = userProfile.lastStreakCheck ? new Date(userProfile.lastStreakCheck) : null;
+
+        // if (lastCheck && lastCheck.getTime() === today.getTime()) {
+        //     return; // Already checked today
+        // }
+
+        const lastCheckString = userProfile.lastStreakCheck; // This is 'YYYY-MM-DD'
+        const todayString = today.toISOString().split('T')[0]; // This is also 'YYYY-MM-DD'
+
+        if (lastCheckString === todayString) {
+            return; // Already checked today. This works! ✅
         }
         
         const yesterday = new Date(today);
@@ -964,14 +1054,14 @@ export default function App() {
             .filter(t => {
                 const tDate = new Date(t.date);
                 return t.type === 'expense' &&
-                       tDate.getFullYear() === yesterday.getFullYear() &&
-                       tDate.getMonth() === yesterday.getMonth() &&
-                       tDate.getDate() === yesterday.getDate();
+                    tDate.getFullYear() === yesterday.getFullYear() &&
+                    tDate.getMonth() === yesterday.getMonth() &&
+                    tDate.getDate() === yesterday.getDate();
             })
             .reduce((acc, t) => acc + t.amount, 0);
-            
+
         let newStreak = userProfile.streakCount || 0;
-        
+
         if (userProfile.dailySpendingGoal && expensesYesterday <= userProfile.dailySpendingGoal) {
             newStreak++;
             showToast(`Goal met! Streak: ${newStreak} 🔥`);
@@ -989,7 +1079,7 @@ export default function App() {
     }, [user, userProfile, transactions]);
 
     useEffect(() => {
-        if(userProfile) checkStreak();
+        if (userProfile) checkStreak();
     }, [userProfile, checkStreak]);
 
 
@@ -1011,21 +1101,21 @@ export default function App() {
                 const profileRef = doc(db, 'profiles', currentUser.uid);
                 const profileSnap = await getDoc(profileRef);
                 if (!profileSnap.exists()) {
-                    await setDoc(profileRef, { 
-                        email: currentUser.email, 
-                        name: currentUser.displayName, 
-                        points: 0, 
-                        achievements: [], 
-                        photoURL: currentUser.photoURL, 
+                    await setDoc(profileRef, {
+                        email: currentUser.email,
+                        name: currentUser.displayName,
+                        points: 0,
+                        achievements: [],
+                        photoURL: currentUser.photoURL,
                         id: currentUser.uid,
                         streakCount: 0,
                         lastStreakCheck: null,
                         dailySpendingGoal: null
                     });
                 }
-                 setCurrentView('dashboard');
+                setCurrentView('dashboard');
             } else {
-                 setCurrentView('home');
+                setCurrentView('home');
             }
             setUser(currentUser);
             setIsLoading(false);
@@ -1076,15 +1166,15 @@ export default function App() {
     if (isLoading) {
         return <Preloader />;
     }
-    
+
     const renderView = () => {
-        switch(currentView) {
+        switch (currentView) {
             case 'home': return <LandingView />;
             case 'features': return <FeaturesView />;
             case 'about': return <AboutView />;
             case 'dashboard': return <DashboardView user={user} transactions={transactions} goal={goal} onShowToast={showToast} onAwardAchievement={awardAchievement} />;
             case 'leaderboard': return <LeaderboardView leaderboardData={leaderboardData} currentUser={user} />;
-            case 'profile': return <ProfileView user={user} userProfile={userProfile} onSetDailyGoal={setDailyGoal} onShowToast={showToast} transactions={transactions}/>;
+            case 'profile': return <ProfileView user={user} userProfile={userProfile} onSetDailyGoal={setDailyGoal} onShowToast={showToast} transactions={transactions} />;
             default: return <LandingView />;
         }
     }
