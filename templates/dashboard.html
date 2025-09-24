@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutureFlow Finance Tracker</title>
+    <title>ForeFunds Finance Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="../static/js/firebase.js"></script>
+    
+    
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -66,10 +69,30 @@
     </style>
 </head>
 <body class="gradient-bg text-gray-200 min-h-screen">
+    
+    <nav class="bg-gray-800/50 backdrop-blur-sm border-b border-gray-700/50 sticky top-0 z-50">
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="#" class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">ForeFunds</a>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#" class="text-gray-300 hover:text-blue-400 transition">Home</a>
+                    <a href="#" class="text-gray-300 hover:text-blue-400 transition">Dashboard</a>
+                    <a href="#" class="text-gray-300 hover:text-blue-400 transition">Rewards</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="#" class="text-gray-300 hover:text-blue-400 transition">Profile</a>
+                    <a href="#" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
     <div class="container mx-auto p-4 md:p-8">
         
-        <header class="text-center mb-10">
-            <h1 class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">FutureFlow Finance</h1>
+        <header class="text-center mb-10 mt-8">
+            <h1 class="text-4xl md:text-5xl font-bold">Welcome to Your Financial Dashboard</h1>
             <p class="text-gray-400 mt-2">Track your spending, forecast your future with AI.</p>
         </header>
 
@@ -144,15 +167,15 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div class="bg-gray-800/50 p-5 rounded-2xl shadow-lg border border-gray-700/50">
                         <h3 class="text-sm font-medium text-emerald-400">MONTHLY INCOME</h3>
-                        <p id="total-income" class="text-2xl font-bold mt-1">$0.00</p>
+                        <p id="total-income" class="text-2xl font-bold mt-1">₹0.00</p>
                     </div>
                     <div class="bg-gray-800/50 p-5 rounded-2xl shadow-lg border border-gray-700/50">
                         <h3 class="text-sm font-medium text-red-400">MONTHLY EXPENSES</h3>
-                        <p id="total-expenses" class="text-2xl font-bold mt-1">$0.00</p>
+                        <p id="total-expenses" class="text-2xl font-bold mt-1">₹0.00</p>
                     </div>
                     <div class="bg-gray-800/50 p-5 rounded-2xl shadow-lg border border-gray-700/50">
                         <h3 class="text-sm font-medium text-blue-400">NET BALANCE</h3>
-                        <p id="net-balance" class="text-2xl font-bold mt-1">$0.00</p>
+                        <p id="net-balance" class="text-2xl font-bold mt-1">₹0.00</p>
                     </div>
                 </div>
 
@@ -161,7 +184,7 @@
                          <h2 class="text-2xl font-semibold">Spending Trend</h2>
                          <div class="text-right">
                             <h3 class="text-sm font-medium text-gray-400">PROJECTED MONTHLY SPEND</h3>
-                            <p id="projected-spending" class="text-xl font-bold text-orange-400">$0.00</p>
+                            <p id="projected-spending" class="text-xl font-bold text-orange-400">₹0.00</p>
                          </div>
                     </div>
                     <canvas id="trend-chart" height="150"></canvas>
@@ -179,9 +202,9 @@
         <div id="toast" class="toast"></div>
     </div>
 
-    <script type="module">
+    <script>
         // --- IMPORTANT ---
-        import {GEMINI_API_KEY} from "../api/keys.js"
+        const GEMINI_API_KEY = 'AIzaSyCUv1HyETCm-sC6jHkmhYVmQqNJ3kTj94w';
         pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js`;
 
 
@@ -222,7 +245,7 @@
         let fileToAnalyze = { type: null, data: null };
         
         // --- CORE FUNCTIONS ---
-        const formatCurrency = amount => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+        const formatCurrency = amount => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
         
         const renderTransaction = (tx) => {
             const isExpense = tx.type === 'expense';
@@ -352,7 +375,7 @@
                     { label: 'Projected Trend', data: projectionData, borderColor: 'rgb(251, 146, 60)', borderDash: [5, 5], tension: 0.3, fill: false, }
                 ]},
                 options: { responsive: true, plugins: { legend: { labels: { color: '#d1d5db' } } }, scales: {
-                    y: { beginAtZero: true, ticks: { color: '#9ca3af', callback: v => `$${v}` }, grid: { color: 'rgba(107, 114, 128, 0.2)' } },
+                    y: { beginAtZero: true, ticks: { color: '#9ca3af', callback: v => `₹${v}` }, grid: { color: 'rgba(107, 114, 128, 0.2)' } },
                     x: { ticks: { color: '#9ca3af' }, grid: { color: 'rgba(107, 114, 128, 0.2)' } }
                 }}
             });
@@ -391,7 +414,7 @@
             insightsLoader.classList.remove('hidden');
             insightsOutput.innerHTML = '';
 
-            const prompt = `You are FutureFlow, a friendly financial assistant. Analyze these JSON transactions for the current month. Today's Date: ${new Date().toLocaleDateString()}. Current Net Balance: ${formatCurrency(balance)}. \n\n ${JSON.stringify(monthlyTransactions)} \n\n Provide analysis in Markdown: \n\n### Spending Weak Points\n- Analyze top 2-3 spending categories. \n\n### Savings Suggestions\n- Provide 2-3 actionable savings tips based on their spending. \n\n### Future Trend Forecast\n- Give a narrative forecast for end-of-month spending.`;
+            const prompt = `You are ForeFunds, a friendly financial assistant for a user in India. Analyze these JSON transactions for the current month. Today's Date: ${new Date().toLocaleDateString()}. Current Net Balance: ${formatCurrency(balance)}. \n\n ${JSON.stringify(monthlyTransactions)} \n\n Provide a concise, easy-to-read summary of the analysis in well-structured Markdown. The summary should include:\n\n### Spending Summary\n- A brief overview of the top 2-3 spending categories.\n\n### Savings Suggestions\n- 2-3 actionable savings tips based on their specific spending.\n\n### Future Forecast\n- A narrative forecast for their end-of-month spending.`;
 
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`, {
@@ -400,8 +423,21 @@
                 });
                 if (!response.ok) { const err = await response.json(); throw new Error(err.error.message); }
                 const result = await response.json();
-                const text = result.candidates[0].content.parts[0].text;
-                insightsOutput.innerHTML = text.replace(/### (.*)/g, '<h3 class="text-lg font-semibold">$1</h3>').replace(/[\*-] (.*)/g, '<li class="ml-4 list-disc">$1</li>').replace(/\n/g, '<br>');
+                let text = result.candidates[0].content.parts[0].text;
+                
+                // Convert Markdown to HTML
+                let html = '';
+                text.split('\n').forEach(line => {
+                    if (line.startsWith('### ')) {
+                        html += `<h3 class="text-lg font-semibold mt-4">${line.substring(4)}</h3>`;
+                    } else if (line.startsWith('* ') || line.startsWith('- ')) {
+                        html += `<li class="ml-5 list-disc">${line.substring(2)}</li>`;
+                    } else if (line.trim() !== '') {
+                        html += `<p>${line}</p>`;
+                    }
+                });
+
+                insightsOutput.innerHTML = html;
             } catch (error) {
                 insightsOutput.innerHTML = `<p class="text-red-400">Error: ${error.message}</p>`;
             } finally {
