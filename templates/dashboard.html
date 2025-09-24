@@ -202,9 +202,9 @@
         <div id="toast" class="toast"></div>
     </div>
 
-    <script>
-        // --- IMPORTANT ---
-        const GEMINI_API_KEY = 'AIzaSyCUv1HyETCm-sC6jHkmhYVmQqNJ3kTj94w';
+    <script type="module">
+        
+        import {GEMINI_API_KEY} from "../api/keys.js"
         pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js`;
 
 
