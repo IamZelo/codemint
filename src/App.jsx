@@ -3,7 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { getFirestore, collection, doc, onSnapshot, addDoc, deleteDoc, setDoc, getDoc, updateDoc, arrayUnion, query, orderBy, limit } from "firebase/firestore";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
-
+import { marked } from 'marked';
 // --- IMPORTANT ---
 // To run this app locally with a tool like Vite, you should use environment variables
 // to keep your API keys secure.
@@ -248,6 +248,7 @@ const DashboardView = ({ user, transactions, goal, onShowToast, onAwardAchieveme
     };
     
     const getGeminiInsights = useCallback(async () => {
+
         if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY") {
             setInsights(`<p class="text-orange-400">Add your Gemini API key to enable AI insights.</p>`);
             return;
@@ -273,6 +274,7 @@ const DashboardView = ({ user, transactions, goal, onShowToast, onAwardAchieveme
                 else if (line.startsWith('* ') || line.startsWith('- ')) html += `<li class="ml-5 list-disc">${line.substring(2)}</li>`;
                 else if (line.trim() !== '') html += `<p>${line}</p>`;
             });
+            html = marked(text);
             setInsights(html);
         } catch (error) {
             setInsights(`<p class="text-red-400">Error: ${error.message}</p>`);
