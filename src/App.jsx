@@ -82,8 +82,8 @@ const LandingView = ({ onSignIn }) => (
                 </button>
             </div>
         </nav>
-        <main className="pt-24">
-            <section className="hero text-center flex flex-col items-center gap-6 mt-12 px-4">
+        <main className="pt-24 scroll-smooth">
+            <section className="hero text-center flex flex-col items-center gap-6 mt-12 px-4 scroll-smooth">
                 <h2 className="text-4xl sm:text-6xl font-bold max-w-3xl leading-tight">Track Your Spending, Forecast Your Future with AI.</h2>
                 <p className="text-base sm:text-lg max-w-3xl mb-4 text-gray-400">
                     Effortlessly analyze your UPI screenshots and bank statements. Gain insights, spot trends, and let our
@@ -91,7 +91,7 @@ const LandingView = ({ onSignIn }) => (
                 </p>
                 <div className="dashboard-preview w-full max-w-5xl mt-8 rounded-xl border border-gray-700 overflow-hidden shadow-2xl bg-gray-800 shadow-emerald-500/10">
                     <div className="h-8 bg-gray-700 flex items-center px-4 space-x-2"><div className="w-3 h-3 rounded-full bg-red-500"></div><div className="w-3 h-3 rounded-full bg-yellow-500"></div><div className="w-3 h-3 rounded-full bg-green-500"></div></div>
-                    <img src="https://storage.googleapis.com/gemini-prod-us-east1-9556/uploaded/image_1e2654.png" alt="ForeFunds Finance Dashboard Preview" className="w-full h-auto block" onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/900x450/1F2937/F3F4F6?text=Dashboard+Preview'; }} />
+                    <img src="src\assets\dashboard_preview.png" alt="ForeFunds Finance Dashboard Preview" className="w-full h-auto block" onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/900x450/1F2937/F3F4F6?text=Dashboard+Preview'; }} />
                 </div>
             </section>
 
