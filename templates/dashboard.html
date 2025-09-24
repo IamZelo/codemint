@@ -10,6 +10,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="../static/js/firebase.js"></script>
+    
+    
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -179,9 +182,9 @@
         <div id="toast" class="toast"></div>
     </div>
 
-    <script>
+    <script type="module">
         // --- IMPORTANT ---
-        const GEMINI_API_KEY = 'AIzaSyCUv1HyETCm-sC6jHkmhYVmQqNJ3kTj94w';
+        import {GEMINI_API_KEY} from "../api/keys.js"
         pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js`;
 
 
