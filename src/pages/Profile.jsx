@@ -1,4 +1,5 @@
 import SpendingHeatmap from '../components/SpendingHeatmap';
+import { motion } from 'framer-motion';
 
 const LockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>;
 const CheckCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-400"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>;
@@ -27,6 +28,12 @@ const Profile = ({ user, userProfile, onSetDailyGoal, onShowToast, transactions 
     };
 
     return (
+        <motion.div 
+        
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+    >
         <div className="container mx-auto p-4 md:p-8">
             <header className="text-center mb-10 mt-8">
                 <img src={user.photoURL} className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-emerald-400" alt="User Profile" />
@@ -85,6 +92,7 @@ const Profile = ({ user, userProfile, onSetDailyGoal, onShowToast, transactions 
                 </div>
             </div>
         </div>
+    </motion.div>
     );
 };
 

@@ -1,4 +1,6 @@
 import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { motion } from 'framer-motion';
+
 
 const Leaderboard = ({ leaderboardData, currentUser }) => {
     const getFallbackAvatar = (name) => {
@@ -22,6 +24,12 @@ const Leaderboard = ({ leaderboardData, currentUser }) => {
 
 
     return (
+        <motion.div 
+        
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+    >
         <div className="container mx-auto p-4 md:p-8">
             <header className="text-center mb-10 mt-8">
                 <h1 className="text-4xl md:text-5xl font-bold">Leaderboard</h1>
@@ -66,6 +74,7 @@ const Leaderboard = ({ leaderboardData, currentUser }) => {
                 </div>
             </div>
         </div>
+    </motion.div>
     );
 };
 

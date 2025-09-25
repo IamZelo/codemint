@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { onAuthStateChanged, signOut, signInWithPopup } from "firebase/auth";
 import { collection, doc, onSnapshot, getDoc, setDoc, updateDoc, arrayUnion, query, orderBy, limit } from "firebase/firestore";
 import { auth, db, provider } from './firebase';
@@ -90,7 +90,7 @@ export default function App() {
         if (lastCheckString === todayString) {
             return; // Already checked today. This works! ✅
         }
-        
+
         const yesterday = new Date(today);
         yesterday.setDate(today.getDate() - 1);
 
@@ -157,7 +157,7 @@ export default function App() {
                         dailySpendingGoal: null
                     });
                 }
-            } 
+            }
             setUser(currentUser);
             setIsLoading(false);
         });
@@ -185,20 +185,34 @@ export default function App() {
         return () => unsubscribers.forEach(unsub => unsub());
     }, [user]);
 
-    const handleSignIn = () => {
-        signInWithPopup(auth, provider).catch(error => {
+    const navigate = useNavigate();
+
+
+    const handleSignIn = async () => {
+        try {
+            const result = await signInWithPopup(auth, provider);
+            showToast("Signed in successfully!");
+            setTimeout(() => {
+                navigate('/dashboard');
+            }, 400);
+        } catch (error) {
             console.error("Sign in error", error);
             showToast('Failed to sign in.');
-        });
+        }
     };
 
-    const handleSignOut = () => {
-        signOut(auth).catch(error => {
+    const handleSignOut = async () => {
+        try {
+            const result = await signOut(auth);
+            showToast("Signed out successfully!");
+            setIsLogoutModalOpen(false);
+            navigate('/'); // Navigate after logout
+        } catch (error) {
             console.error("Sign out error", error);
             showToast('Failed to sign out.');
-        });
-        setIsLogoutModalOpen(false);
+        }
     };
+
 
     const promptLogout = () => {
         setIsLogoutModalOpen(true);
@@ -209,7 +223,8 @@ export default function App() {
     }
 
     return (
-        <Router>
+        <>
+
             <style>{`
 html { scroll-behavior: smooth; }
 body { font-family: 'Inter', sans-serif; }
@@ -257,6 +272,6 @@ button, .cursor-pointer, a { cursor: pointer; }
                     <p>Are you sure you want to log out?</p>
                 </ConfirmationModal>
             </div>
-        </Router>
+        </>
     );
 }

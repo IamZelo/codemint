@@ -1,4 +1,13 @@
+import { motion } from 'framer-motion';
+
+
 const Home = () => (
+    <motion.div 
+        
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+    >
     <div className="flex flex-col min-h-[calc(100vh-4.5rem)]">
         <main className="flex-grow pt-24">
             <section className="hero text-center flex flex-col items-center gap-6 mt-12 px-4">
@@ -17,6 +26,7 @@ const Home = () => (
             <p>&copy; {new Date().getFullYear()} ForeFunds Finance. All Rights Reserved.</p>
         </footer>
     </div>
+    </motion.div>
 );
 
 export default Home;

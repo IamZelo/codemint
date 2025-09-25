@@ -2,6 +2,12 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const AppNavbar = ({ user, onSignOut, onSignIn }) => {
+
+    const getFallbackAvatar = (name) => {
+        const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2);
+        return `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=random&color=fff`;
+    };
+
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const handleLinkClick = () => {
