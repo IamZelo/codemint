@@ -15,6 +15,8 @@ import About from './pages/About';
 import Dashboard from './pages/Dashboard';
 import Leaderboard from './pages/Leaderboard';
 import Profile from './pages/Profile';
+import Calculate from './pages/Calculate';
+
 
 const ACHIEVEMENTS_LIST = [
     { id: 'first_transaction', title: 'Getting Started', description: 'Add your very first transaction.', points: 10, icon: '🎉' },
@@ -257,6 +259,7 @@ button, .cursor-pointer, a { cursor: pointer; }
                         <Route path="/" element={<Home />} />
                         <Route path="/features" element={<Features />} />
                         <Route path="/about" element={<About />} />
+                        <Route path="/calculator" element={<Calculate />} />
                         <Route path="/dashboard" element={user ? <Dashboard user={user} transactions={transactions} goal={goal} onShowToast={showToast} onAwardAchievement={awardAchievement} /> : <Navigate to="/" />} />
                         <Route path="/leaderboard" element={user ? <Leaderboard leaderboardData={leaderboardData} currentUser={user} /> : <Navigate to="/" />} />
                         <Route path="/profile" element={user ? <Profile user={user} userProfile={userProfile} onSetDailyGoal={setDailyGoal} onShowToast={showToast} transactions={transactions} /> : <Navigate to="/" />} />
