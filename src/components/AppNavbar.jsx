@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
 const AppNavbar = ({ user, onSignOut, onSignIn }) => {
@@ -9,15 +9,32 @@ const AppNavbar = ({ user, onSignOut, onSignIn }) => {
     };
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
 
     const handleLinkClick = () => {
         setIsMenuOpen(false);
     };
+    
+
+    // Effect to close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
 
     const NavButton = ({ to, children }) => (
         <Link
             to={to}
-            className={`font-semibold transition transform hover:-translate-y-0.5 text-gray-300 hover:text-blue-400'}`}
+            className={`font-semibold transition transform hover:-translate-y-0.5 text-gray-300 hover:text-blue-400`}
         >
             {children}
         </Link>
@@ -26,12 +43,12 @@ const AppNavbar = ({ user, onSignOut, onSignIn }) => {
     return (
         
                 <nav className="bg-gray-800/50 backdrop-blur-sm border-b border-gray-700/50 sticky top-0 z-50">
-                    <div className="container mx-auto px-4 md:px-8">
+                    <div className="container mx-auto px-4 md:px-6">
                         <div className="flex items-center justify-between h-16">
                             <Link to={user ? '/dashboard' : '/'} className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">ForeFunds</Link>
 
                             {/* Desktop Menu */}
-                            <div className="hidden md:flex items-center space-x-8">
+                            <div className="hidden md:flex pl-5 items-center space-x-7">
                                 {user ? (
                                     <>
                                         <NavButton to="/dashboard">Dashboard</NavButton>
@@ -84,27 +101,46 @@ const AppNavbar = ({ user, onSignOut, onSignIn }) => {
                             </div>
                         </div>
                     </div>
-
-                    {/* Full-screen Mobile Menu */}
-                    <div className={`fixed inset-0 z-40 bg-gray-900 bg-opacity-95 backdrop-blur-sm transition-opacity duration-300 ease-in-out md:hidden ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-                        <div className="flex flex-col items-center justify-center h-full space-y-8">
+                    <div className={`fixed inset-0 z-40 bg-gray-900/95 transition-opacity duration-300 ease-in-out md:hidden ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                        {/* New div specifically for the blur effect */}
+                        <div className="absolute inset-0 bg-gray-900/95 backdrop-blur-sm min-h-screen">
+                        <div className="flex flex-col items-center justify-center space-y-6 text-center p-6 mt-12">
                             {user ? (
                                 <>
-                                    <Link to="/dashboard" onClick={handleLinkClick} className={`text-2xl font-semibold transition-colors text-gray-300 hover:text-blue-400'}`}>Dashboard</Link>
-                                    <Link to="/leaderboard" onClick={handleLinkClick} className={`text-2xl font-semibold transition-colors text-gray-300 hover:text-blue-400'}`}>Leaderboard</Link>
-                                    <Link to="/profile" onClick={handleLinkClick} className={`text-2xl font-semibold transition-colors text-gray-300 hover:text-blue-400'}`}>Profile</Link>
-                                    <button onClick={onSignOut} className="absolute bottom-16 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-md text-base font-medium transition transform hover:-translate-y-0.5">Logout</button>
+                                    {/* Added user avatar and name */}
+                                    <div className="flex flex-col items-center space-y-2 mb-4">
+                                        <img src={user.photoURL} className="rounded-full w-16 h-16 border-2 border-blue-400" alt="User avatar" />
+                                        <span className="font-semibold text-white text-lg">{user.displayName}</span>
+                                    </div>
+
+                                    <Link to="/dashboard" onClick={handleLinkClick} className="text-2xl font-semibold transition-colors text-gray-300 hover:text-blue-400">Dashboard</Link>
+                                    <Link to="/leaderboard" onClick={handleLinkClick} className="text-2xl font-semibold transition-colors text-gray-300 hover:text-blue-400">Leaderboard</Link>
+                                    
+                                    {/* Added missing links for consistency */}
+                                    <Link to="/features" onClick={handleLinkClick} className="text-2xl font-semibold transition-colors text-gray-300 hover:text-blue-400">Features</Link>
+                                    <Link to="/about" onClick={handleLinkClick} className="text-2xl font-semibold transition-colors text-gray-300 hover:text-blue-400">About</Link>
+                                    <Link to="/calculator" onClick={handleLinkClick} className="text-2xl font-semibold transition-colors text-gray-300 hover:text-blue-400">Calculator</Link>
+
+                                    {/* Added a visual divider */}
+                                    <div className="w-1/4 border-t border-gray-700 !my-8"></div>
+
+                                    <Link to="/profile" onClick={handleLinkClick} className="text-2xl font-semibold transition-colors text-gray-300 hover:text-blue-400">Profile</Link>
+                                    
+                                    {/* Ensured menu closes on logout */}
+                                    <button onClick={() => { onSignOut(); handleLinkClick(); }} className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-md text-base font-medium transition transform hover:-translate-y-0.5">Logout</button>
                                 </>
                             ) : (
                                 <>
-                                    <Link to="/" onClick={handleLinkClick} className={`text-2xl font-semibold transition-colors text-gray-300 hover:text-blue-400'}`}>Home</Link>
-                                    <Link to="/features" onClick={handleLinkClick} className={`text-2xl font-semibold transition-colors text-gray-300 hover:text-blue-400'}`}>Features</Link>
-                                    <Link to="/about" onClick={handleLinkClick} className={`text-2xl font-semibold transition-colors text-gray-300 hover:text-blue-400'}`}>About</Link>
-                                    <Link to="/calculator" onClick={handleLinkClick} className={`text-2xl font-semibold transition-colors text-gray-300 hover:text-blue-400'}`}>Calculator</Link>
+                                    <Link to="/" onClick={handleLinkClick} className="text-2xl font-semibold transition-colors text-gray-300 hover:text-blue-400">Home</Link>
+                                    <Link to="/features" onClick={handleLinkClick} className="text-2xl font-semibold transition-colors text-gray-300 hover:text-blue-400">Features</Link>
+                                    <Link to="/about" onClick={handleLinkClick} className="text-2xl font-semibold transition-colors text-gray-300 hover:text-blue-400">About</Link>
+                                    <Link to="/calculator" onClick={handleLinkClick} className="text-2xl font-semibold transition-colors text-gray-300 hover:text-blue-400">Calculator</Link>
                                 </>
                             )}
                         </div>
+                        </div>
                     </div>
+
                 </nav>
         
     );
