@@ -88,10 +88,6 @@ const Dashboard = ({ user, transactions, goal, onShowToast, onAwardAchievement }
 
     const getGeminiInsights = useCallback(async () => {
 
-        if (!import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY === "YOUR_GEMINI_API_KEY") {
-            setInsights(`<p class="text-orange-400">Add your Gemini API key to enable AI insights.</p>`);
-            return;
-        }
         if (transactions.length === 0) {
             setInsights(`<p class="text-gray-400">Add a transaction for analysis.</p>`);
             return;
@@ -113,10 +109,11 @@ const Dashboard = ({ user, transactions, goal, onShowToast, onAwardAchievement }
 - A narrative forecast for their end-of-month spending.`;
 
         try {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`, {
+            const response = await fetch('/.netlify/functions/get-insights', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
             });
+
             if (!response.ok) { const err = await response.json(); throw new Error(err.error.message); }
             const result = await response.json();
             let text = result.candidates[0].content.parts[0].text;
@@ -189,7 +186,7 @@ const Dashboard = ({ user, transactions, goal, onShowToast, onAwardAchievement }
             } catch (error) { onShowToast("Error reading PDF file."); setIsAnalyzing(false); return; }
         }
         try {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`, {
+            const response = await fetch('/.netlify/functions/analyze-document', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ contents: [{ parts }] })
             });
