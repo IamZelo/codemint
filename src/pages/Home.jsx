@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-
+import preview from "../assets/dashboard_preview.png"
 
 const Home = () => (
     <motion.div 
@@ -18,7 +18,7 @@ const Home = () => (
                 </p>
                 <div className="dashboard-preview w-full max-w-5xl mt-8 rounded-xl border border-gray-700 overflow-hidden shadow-2xl bg-gray-800 shadow-emerald-500/10">
                     <div className="h-8 bg-gray-700 flex items-center px-4 space-x-2"><div className="w-3 h-3 rounded-full bg-red-500"></div><div className="w-3 h-3 rounded-full bg-yellow-500"></div><div className="w-3 h-3 rounded-full bg-green-500"></div></div>
-                    <img src="src\assets\dashboard_preview.png" alt="ForeFunds Finance Dashboard Preview" className="w-full h-auto block" onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/900x450/1F2937/F3F4F6?text=Dashboard+Preview'; }} />
+                    <img src={preview} alt="ForeFunds Finance Dashboard Preview" className="w-full h-auto block" onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/900x450/1F2937/F3F4F6?text=Dashboard+Preview'; }} />
                 </div>
             </section>
         </main>

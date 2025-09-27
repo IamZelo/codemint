@@ -1,4 +1,9 @@
 import { useMemo } from 'react';
+import world0 from '../assets/world_0.png';
+import world1 from '../assets/world_1.png';
+import world2 from '../assets/world_2.png';
+import world3 from '../assets/world_3.png';
+import world4 from '../assets/world_4.png';
 
 const ForeScoreView = ({ transactions, goal }) => {
     const foreScore = useMemo(() => {
@@ -40,11 +45,11 @@ const ForeScoreView = ({ transactions, goal }) => {
     }, [transactions, goal]);
 
     const worldImages = [
-        "src\\assets\\world_0.png", // Score 0-20 (Desert)
-        'src\\assets\\world_1.png', // Score 21-40 (Sparse Desert)
-        'src\\assets\\world_2.png', // Score 41-60 (Sparse Forest)
-        'src\\assets\\world_3.png', // Score 61-80 (Medium Forest)
-        'src\\assets\\world_4.png'  // Score 81-100 (Dense Forest)
+        world0, // Score 0-20 (Desert)
+        world1, // Score 21-40 (Sparse Desert)
+        world2, // Score 41-60 (Sparse Forest)
+        world3, // Score 61-80 (Medium Forest)
+        world4 // Score 81-100 (Dense Forest)
     ];
 
     const worldImage = useMemo(() => {
