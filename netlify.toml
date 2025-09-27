@@ -1,0 +1,10 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[functions]
+  directory = "netlify/functions"
+
+[dev]
+  command = "npm run dev" # Tells Netlify how to start your dev server
+  targetPort = 5173      # The port your Vite server runs on
